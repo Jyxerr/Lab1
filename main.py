@@ -11,8 +11,6 @@ i_am_in_skobochki = 0
 with io.open('steam_description_data.csv', encoding='utf-8') as f:
     for line in f:
         low_s = line.lower()
-        #low_s = low_s.replace('&quot;', '"')
-        #low_s = low_s.replace('&gt;', '|')    #&gt; - '>', but we the number of '>' affects the calculation of the number of words so we replace it with '|'
 
         i = 0
 
