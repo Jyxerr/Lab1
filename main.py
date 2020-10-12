@@ -1,49 +1,64 @@
-import io
+symbols = 0
+symbols_no_spaces = 0
+symbols_no_punctuation = 0
+words = 0
+sentences = 0
+is_in_brackets = False
 
-
-cnt_Symb = 0
-cnt_Symb_W_S = 0 #symbols without spaces
-cnt_Symb_W_P_M = 0 #symbols without punctuation marks
-cnt_Words = 0
-cnt_Sentences = 0
-i_am_in_skobochki = 0
-
-with io.open('steam_description_data.csv', encoding='utf-8') as f:
+with open('steam_description_data.csv', encoding='utf-8') as f:
     for line in f:
-        low_s = line.lower()
+
+        # All letters are lowered to make it easier to work with words and sentences
+        low_string = line.lower()
 
         i = 0
 
-        cnt_Symb += len(low_s)
-        for ch in low_s:
-                cch = ch
+        symbols += len(low_string)
+        for ch in low_string:
 
-                if cch != ' ':
-                    cnt_Symb_W_S +=1
+                if ch != ' ':
+                    symbols_no_spaces += 1
 
-                if not(cch in ',?.!:;-'):
-                    cnt_Symb_W_P_M +=1
+                if not(ch in ',?.!:;-'):
+                    symbols_no_punctuation += 1
 
-                if i_am_in_skobochki == 0 and i != 0 and (ord(cch) < ord('a') or ord(cch) > ord('z')) and (ord(cch) < ord('一') or ord(cch) > ord('刏')):
-                       if ord(low_s[i-1]) >= ord('a') and ord(low_s[i-1]) <= ord('z'):
-                           cnt_Words +=1
-                           if cch in '?!' or (cch == '.' and low_s[i-2] != '.'): #abbreviation is a 1 word
-                               cnt_Sentences +=1
+                if (not(is_in_brackets) and i != 0 and
+                    (ord(ch) < ord('a') or ord(ch) > ord('z')) and
+                    (ord(ch) < ord('一') or ord(ch) > ord('刏'))):
+                    # Sentence or word ended
 
-                       if ord(low_s[i - 1]) >= ord('一') and ord(low_s[i - 1]) <= ord('刏'):
-                           cnt_Words +=1
-                           if cch in '?.!':
-                               cnt_Sentences +=1
+                        # Counting words and sentences with letters:
+                        if (ord(low_string[i-1]) >= ord('a') and
+                            ord(low_string[i-1]) <= ord('z') and
+                            not(ch == '.' and low_string[i-2] != '.')):
+                                # Abbreviation is a 1 word
+                                words += 1
 
-                if cch == '<':
-                    i_am_in_skobochki +=1
-                if cch == '>':
-                    i_am_in_skobochki -=1
+                                if ch in '?!':
+                                    sentences += 1
+                                # Abbreviation is 0 sentences
+                                if ch == '.':
+                                    if i+2 < len(low_string):
+                                        if low_string[i+2] != '.':
+                                            sentences += 1
+                                    else:
+                                        sentences += 1
+
+                        # Counting words and sentences with hieroglyphs:
+                        if ord(low_string[i-1]) >= ord('一') and ord(low_string[i-1]) <= ord('刏'):
+                           words += 1
+                           if ch in '?.!':
+                               sentences += 1
+
+                if ch == '<':
+                    is_in_brackets = True
+                if ch == '>':
+                    is_in_brackets = False
 
                 i +=1
 
-print('Общее количество символов:', cnt_Symb)
-print('Общее количество символов без пробелов:', cnt_Symb_W_S)
-print('Общее количество символов без знаков препинания:', cnt_Symb_W_P_M)
-print('Общее количество слов:', cnt_Words)
-print('Общее количество предложений:', cnt_Sentences)
+print('Общее количество символов:', symbols)
+print('Общее количество символов без пробелов:', symbols_no_spaces)
+print('Общее количество символов без знаков препинания:', symbols_no_punctuation)
+print('Общее количество слов:', words)
+print('Общее количество предложений:', sentences)
